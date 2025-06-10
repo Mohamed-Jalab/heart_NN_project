@@ -41,17 +41,42 @@ void main() {
   // List<String> nums = ["hi", "43", "77"];
   // DatasetManager.encodeStrsToNums(nums);
   // print(nums);
-  List<double> inputs = [for (int i = 0; i < 3; i++) 1];
-  double output = 1;
+  List<double> inputs = [1, 1];
+  double output = 0;
   NeuralNetwork network = NeuralNetwork(
       inputValues: inputs,
       outputValue: output,
-      neuronsOfEachLayer: [3, 1],
-      activations: ["tanh", "sigmoid"]);
-  // print(network.layers.first.neurons.first.output);
+      neuronsOfEachLayer: [2, 1],
+      activations: ["sigmoid", "sigmoid"]);
+  network.layers[0].neurons[0].weights[0] = 0.5;
+  network.layers[0].neurons[0].weights[1] = 0.4;
+  network.layers[0].neurons[0].weights[2] = 0.8;
+  network.layers[0].neurons[0].bias = -1.0;
+
+  network.layers[0].neurons[1].weights[0] = 0.9;
+  network.layers[0].neurons[1].weights[1] = 1.0;
+  network.layers[0].neurons[1].weights[2] = -0.1;
+  network.layers[0].neurons[1].bias = -1.0;
+
+  network.layers[1].neurons[0].weights[0] = -1.2;
+  network.layers[1].neurons[0].weights[1] = 1.1;
+  network.layers[1].neurons[0].weights[2] = 0.3;
+  network.layers[1].neurons[0].bias = -1.0;
+  print("feedforward:");
   print(network.feedForward);
-  for (final Neuron neuron in network.layers[0].neurons) print(neuron.output);
+  print("");
+  // print("outputs neurons:");
+  // for (final Neuron neuron in network.layers[0].neurons) print(neuron.output);
+  // print("");
+  // print("weights: ");
+  // for (final double weight in network.layers.first.neurons.first.weights)
+  //   print(weight);
+  print("back propagation: ");
   print(network.backPropagation);
+  print("");
+
+
+
 //   for (var variable = 0; variable<10; variable++) {
 //   network.backPropagation;
 //   print(network.feedForward);
