@@ -7,21 +7,26 @@ import 'neuron.dart';
 List<List<Object>> trainingSetFeatures = [];
 List<List<Object>> testSetFeatures = [];
 List<Object> trainingSetOutput = [], testSetOutput = [];
+double accuracy = 0;
+double accuracy1 = 0;
+List<List<double>> weightsAndBias = [];
 void main() {
-  int accuracy = 0;
-
   List<String> csvFile = File("heart.csv").readAsStringSync().split("\n");
   print(csvFile.length);
   print("remove : ${csvFile.removeAt(0)}"); //? remove the headers
   csvFile.shuffle();
+  // csvFile.shuffle();
+  // csvFile.shuffle();
   print(csvFile.length);
   List<List<Object>> csvProcessed =
       DatasetManager.createDataset(csvFile, logProcess: true);
-      
-
+  // csvProcessed.shuffle();
+  // csvProcessed[0] = DatasetManager.normalize(csvProcessed[0] as List<int>);
+  // print(csvProcessed[0]);
   //? create dataset
   //? ---------------------
   //? includes output in last element of each row
+
   //? each row means single feature
   trainingSetFeatures = [];
   testSetFeatures = [];
@@ -43,11 +48,11 @@ void main() {
   print(inputs);
   double output = double.parse(trainingSetOutput.first.toString());
   NeuralNetwork network = NeuralNetwork(
-      learningRate: .1,
+      learningRate: .6,
       inputValues: inputs,
       outputValue: output,
-      neuronsOfEachLayer: [22, 1],
-      activations: ["sigmoid", "sigmoid"]);
+      neuronsOfEachLayer: const [11, 1],
+      activations: const ["sigmoid", "sigmoid"]);
   trainNetwork(network: network, epoch: 30000);
   // mytest(network);
 }
@@ -86,12 +91,9 @@ void trainNetwork(
       trainMeanSquareError +=
           pow((network.desiredOutput - actualOutput), 2).toDouble();
 
-      // if(double.parse(network.feedForward.toString()).round() > )
       network.backPropagation;
-      // print(network.backPropagation);
     }
     if (i == (trainingSetFeatures[0].length * .1).toInt()) {
-      print("==change learning rate==");
       network.learningRate *= changingLearningRate;
     }
     //! testing
@@ -111,7 +113,23 @@ void trainNetwork(
       testMeanSquareError +=
           pow((network.desiredOutput - actualOutput), 2).toDouble();
     }
-
+    // print(testAccuracy);
+    // print(testAccuracy / testSetFeatures.first.length > accuracy);
+    if (trainAccuracy / trainingSetFeatures.first.length > accuracy &&
+        testAccuracy / testSetFeatures.first.length > accuracy1) {
+      saveWeights(network);
+      accuracy = trainAccuracy / trainingSetFeatures.first.length;
+      accuracy1 = testAccuracy / testSetFeatures.first.length;
+      // weightsAndBias.clear();
+      // for (final Layer layer in network.layers) {
+      //   weightsAndBias.add([]);
+      //   for (final Neuron neuron in layer.neurons) {
+      //     for (final double weight in neuron.weights)
+      //       weightsAndBias.last.add(weight);
+      //     weightsAndBias.last.add(neuron.bias);
+      //   }
+      // }
+    }
     print(
         "Epoch $i Training => accuracy: ${trainAccuracy / trainingSetFeatures.first.length}  loss: ${trainMeanSquareError / trainingSetFeatures.first.length}   |   Test => accuracy: ${testAccuracy / testSetFeatures.first.length}  loss: ${testMeanSquareError / testSetFeatures.first.length}");
   }
@@ -167,11 +185,21 @@ void mytest(NeuralNetwork network) {
   }
 }
 
-
-
-
-
-
+void saveWeights(NeuralNetwork network) {
+  File file = File(
+      "weights_${network.layers.first.neurons.length}_${network.layers.last.neurons.length}.mohammed");
+  IOSink sink = file.openWrite();
+  for (int i = 0; i < network.layers.length; i++) {
+    for (int j = 0; j < network.layers[i].neurons.length; j++) {
+      for (final double weight in network.layers[i].neurons[j].weights)
+        sink.write("$weight ");
+      sink.write(network.layers[i].neurons[j].bias.toString());
+      sink.write("||");
+    }
+    if (i != network.layers.length - 1) sink.write("\n");
+  }
+  sink.close();
+}
 
 
 

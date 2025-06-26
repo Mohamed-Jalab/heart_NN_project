@@ -82,7 +82,7 @@ class Layer {
 }
 
 class NeuralNetwork {
-  final double learningRate;
+  double learningRate;
   List<InputNeuron> inputs = [];
   late double desiredOutput;
   final List<Layer> layers = [];
@@ -118,6 +118,9 @@ class NeuralNetwork {
     }
   }
 
+
+
+
   /// this get method either
   /// returns on its output if the last [Layer] has just one [Neuron]
   /// or
@@ -134,7 +137,7 @@ class NeuralNetwork {
   /// this get method currently worked for single [Neuron] for output [Layer]
   ///
   /// we'll see later to develop to be more flexible with multi [Layer] for output
-  List<Object> get backPropagation {
+  List<List<Object>> get backPropagation {
     double? out = double.tryParse(feedForward.toString());
     if (out == null) throw "feedForward isn't double try to casting to double";
     if (layers.last.neurons.length > 1)
@@ -172,6 +175,9 @@ class NeuralNetwork {
       else
         deltaWOut
             .add(learningRate * layers.last.neurons.first.bias * gradientOut);
+    
+    
+    
     List<List<double>> deltaWHidden = [];
 
     ///calculate deltaW for hidden neurons
@@ -186,48 +192,8 @@ class NeuralNetwork {
               learningRate * layers.first.neurons[i].bias * gradientHidden[i]);
     }
 
-    // // desc
-    // for (int i = 0, j = layers.length - 2; i < layers.length - 1; i++, j--) {
-    //   /// each row refers to his layer
-    //   gradientHiddens.add([]);
-    //   if (j == layers.length - 2)
-    //     for (int k = 0; k < layers[j].neurons.length; k++) {
-    //       double temp =
-    //           layers[j].neurons[k].output * (1 - layers[j].neurons[k].output);
-    //       double gradient =
-    //           temp * gradientOut * layers[j + 1].neurons.first.weights[k];
-    //       gradientHiddens.last.add(gradient);
-    //     }
-    // }
-
-    // // calc delta w [asc]
-    // List<List<List<double>>> deltaWeights = [[], []];
-    // //here for output weights
-    // deltaWeights[1].add([]);
-    // for (int i = 0; i < layers[1].neurons.first.weights.length; i++) {
-    //   if (i < layers[0].neurons.length - 1)
-    //     deltaWeights[1][0]
-    //         .add(learningRate * layers[0].neurons[i].output * gradientOut);
-    //   else
-    //     deltaWeights[1][0]
-    //         .add(learningRate * layers[1].neurons.first.bias * gradientOut);
-    // }
-
-    // // here for hidden weights
-    // for (int j = 0; j < layers[0].neurons.length; j++) {
-    //   deltaWeights[0].add([]);
-    //   for (int i = 0; i < layers[0].neurons[j].weights.length; i++)
-    //     if (i < layers[0].neurons.length - 1)
-    //       deltaWeights[0][j]
-    //           .add(learningRate * inputs[i].output * gradientHiddens[0][j]);
-    //     else
-    //       deltaWeights[0][j].add(
-    //           learningRate * layers[0].neurons[j].bias * gradientHiddens[0][j]);
-    // }
-
-    // print(deltaWeights);
     List<List<Object>> deltaW = [deltaWHidden, deltaWOut];
-
+    // update the weights
     for (int i = 0; i < deltaW.length; i++)
       for (int j = 0; j < deltaW[i].length; j++) {
         // print(deltaW[i][j]);
@@ -237,54 +203,14 @@ class NeuralNetwork {
                 (deltaW[i][j] as List<double>)[k];
           }
         else
-          layers[i].neurons.first.weights[j] += deltaW[i][j] as double ;
+          layers[i].neurons.first.weights[j] += deltaW[i][j] as double;
       }
     // print("gradient out : ${gradientOut}");
     // print("deltaWOut: ${deltaWOut}");
     // print("deltaWHidden: ${deltaWHidden}");
     // return deltaW;
-    return layers.first.neurons.first.weights;
+    return deltaW;
   }
-  // void get backPropagation {
-  //   double? out = double.tryParse(feedForward.toString());
-  //   if (out == null) throw "feedForward isn't double try to casting to double";
-  //   if(layers.last.neurons.length > 1 ) throw "currently we unsupported more than 1 output neuron";
-  //   /// calculate
-  //   double error = actualOutput - out;
-  //   double gradientOut = out * (1 - out) * error;
-  //   List<List<double>> gradeintHiddens = [];
-  //   for (int i = 0, j = layers.length - 1; i < layers.length - 1; i++, j--) {
-  //     // add gradient layer
-  //     gradeintHiddens.add([]);
-  //     // add gradients to own layer
-  //     for (int k = 0; k < layers[j].neurons.length; k++) {
-  //       if (j == layers.length - 1) {
-  //         double temp =
-  //             layers[j].neurons[k].output * (1 - layers[j].neurons[k].output);
-  //         double gradientHidden = temp * gradientOut;
-  //         gradeintHiddens.last.add(gradientHidden);
-  //       }
-  //       else {
-  //         double temp =
-  //             layers[j].neurons[k].output * (1 - layers[j].neurons[k].output);
-  //         double gradientHidden = 0;
-  //         for (int z = 0 ; z < layers[j + 1].neurons.length; z++)
-  //           gradientHidden += layers[j + 1].neurons[z].weights[k] * gradeintHiddens[i - 1][z];
-  //         gradientHidden *= temp;
-  //         gradeintHiddens.last.add(gradientHidden);
-  //       }
-  //     }
-  //   }
-  //   /// update weights
-  //   for (int i = 0; i < layers.length - 1; i++) {
-  //     for (int j = 0; j < layers[i].neurons.length; j++) {
-  //       for (int k = 0; k < layers[i + 1].neurons.length; k++) {
-  //         layers[i].neurons[j].weights[k] +=
-  //             learningRate * gradeintHiddens[i][k] * layers[i + 1].neurons[k].output;
-  //       }
-  //     }
-  //   }
-  // }
 }
 
 double ReLU(double input) {
